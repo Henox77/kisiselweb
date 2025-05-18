@@ -20,4 +20,4 @@ Kurulumu oldukça basit, indirip sunucunuza yüklemeniz yeterlidir.
 
 ---
 
-⭐️ Beğendiyseniz yıldız vermeyi unutmayın! 
+⭐️ Beğendiyseniz starlamayı unutmayın
