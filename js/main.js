@@ -1,126 +1,165 @@
 const cursor = document.querySelector('.cursor');
 const cursorFollower = document.querySelector('.cursor-follower');
 
-document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-    
-    setTimeout(() => {
-        cursorFollower.style.left = e.clientX + 'px';
-        cursorFollower.style.top = e.clientY + 'px';
-    }, 100);
-});
-
-document.addEventListener('mousedown', () => {
-    cursor.style.transform = 'scale(0.5)';
-    cursorFollower.style.transform = 'scale(0.8)';
-});
-
-document.addEventListener('mouseup', () => {
-    cursor.style.transform = 'scale(1)';
-    cursorFollower.style.transform = 'scale(1)';
-});
-
-const links = document.querySelectorAll('a, button, .project-card, .skill-item');
-links.forEach(link => {
-    link.addEventListener('mouseenter', () => {
-        cursor.style.transform = 'scale(2)';
-        cursorFollower.style.transform = 'scale(1.5)';
-    });
-    
-    link.addEventListener('mouseleave', () => {
-        cursor.style.transform = 'scale(1)';
-        cursorFollower.style.transform = 'scale(1)';
-    });
-});
-
-const menuBtn = document.querySelector('.menu-btn');
-const navLinks = document.querySelector('.nav-links');
-const menuLines = document.querySelectorAll('.menu-line');
-
-menuBtn.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-    menuLines.forEach(line => line.classList.toggle('active'));
-});
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        const headerOffset = 80;
-        const elementPosition = target.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-    });
-});
-
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
-        navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-    } else {
-        navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.9)';
-        navbar.style.boxShadow = 'none';
+function initializeCursor() {
+    if (!cursor || !cursorFollower) {
+        console.warn('Cursor elements not found. Custom cursor disabled.');
+        return;
     }
-});
 
-const revealElements = document.querySelectorAll('.section-header, .about-content, .projects-grid, .skills-container, .contact-container');
-
-const revealOnScroll = () => {
-    revealElements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementVisible = 150;
-
-        if (elementTop < window.innerHeight - elementVisible) {
-            element.classList.add('revealed');
+    document.addEventListener('mousemove', (e) => {
+        try {
+            cursor.style.left = `${e.clientX}px`;
+            cursor.style.top = `${e.clientY}px`;
+            
+            setTimeout(() => {
+                cursorFollower.style.left = `${e.clientX}px`;
+                cursorFollower.style.top = `${e.clientY}px`;
+            }, 100);
+        } catch (error) {
+            console.error('Error updating cursor position:', error);
         }
     });
-};
 
-window.addEventListener('scroll', revealOnScroll);
-revealOnScroll(); 
+    document.addEventListener('mousedown', () => {
+        try {
+            cursor.style.transform = 'scale(0.5)';
+            cursorFollower.style.transform = 'scale(0.8)';
+        } catch (error) {
+            console.error('Error updating cursor scale on mousedown:', error);
+        }
+    });
 
-const contactForm = document.querySelector('.contact-form form');
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const inputs = contactForm.querySelectorAll('input, textarea');
-        let isValid = true;
+    document.addEventListener('mouseup', () => {
+        try {
+            cursor.style.transform = 'scale(1)';
+            cursorFollower.style.transform = 'scale(1)';
+        } catch (error) {
+            console.error('Error updating cursor scale on mouseup:', error);
+        }
+    });
 
-        inputs.forEach(input => {
-            if (!input.value.trim()) {
-                isValid = false;
-                input.classList.add('error');
-            } else {
-                input.classList.remove('error');
+    const links = document.querySelectorAll('a, button, .project-card, .skill-item');
+    links.forEach(link => {
+        link.addEventListener('mouseenter', () => {
+            try {
+                cursor.style.transform = 'scale(2)';
+                cursorFollower.style.transform = 'scale(1.5)';
+            } catch (error) {
+                console.error('Error updating cursor scale on link hover:', error);
             }
         });
+        
+        link.addEventListener('mouseleave', () => {
+            try {
+                cursor.style.transform = 'scale(1)';
+                cursorFollower.style.transform = 'scale(1)';
+            } catch (error) {
+                console.error('Error updating cursor scale on link leave:', error);
+            }
+        });
+    });
+}
 
-        if (isValid) {
-            alert('Mesajınız gönderildi!');
-            contactForm.reset();
+function initializePage() {
+    console.log('Sayfa yüklendi, projeler getiriliyor...');
+    
+    fetchGitHubProjects();
+    
+    animateSkillBars();
+    
+    setupSmoothScroll();
+    
+    setupNavbarScroll();
+    
+    setupScrollReveal();
+    
+    initializeAOS();
+}
+
+function setupSmoothScroll() {
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    if (!anchorLinks || anchorLinks.length === 0) return;
+
+    anchorLinks.forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (!target) return;
+
+            const headerOffset = 80;
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        });
+    });
+}
+
+function setupNavbarScroll() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
+            navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        } else {
+            navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.9)';
+            navbar.style.boxShadow = 'none';
         }
     });
-} else {
-    console.error('Contact form element not found.');
+}
+
+function setupScrollReveal() {
+    const revealElements = document.querySelectorAll('.section-header, .about-content, .projects-grid, .skills-container, .contact-container');
+    if (!revealElements || revealElements.length === 0) return;
+
+    const revealOnScroll = () => {
+        revealElements.forEach(element => {
+            if (!element) return;
+            
+            const elementTop = element.getBoundingClientRect().top;
+            const elementVisible = 150;
+
+            if (elementTop < window.innerHeight - elementVisible) {
+                element.classList.add('revealed');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
+}
+
+function initializeAOS() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    }
 }
 
 async function fetchGitHubProjects() {
     const username = 'Henox77';
     const projectsGrid = document.querySelector('.projects-grid');
     
+    if (!projectsGrid) {
+        console.error('Projects grid element not found');
+        return;
+    }
+
     try {
         console.log('GitHub projeleri yükleniyor...');
         const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=6`);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`GitHub API Hatası: ${response.status}`);
         }
         
         const projects = await response.json();
@@ -131,10 +170,9 @@ async function fetchGitHubProjects() {
             return;
         }
 
-        projectsGrid.innerHTML = '';
-
+        let projectsHTML = '';
         projects.forEach(project => {
-            const projectCard = `
+            projectsHTML += `
                 <div class="project-card" data-aos="fade-up">
                     <div class="project-image">
                         <div class="project-overlay">
@@ -156,10 +194,15 @@ async function fetchGitHubProjects() {
                     </div>
                 </div>
             `;
-            projectsGrid.innerHTML += projectCard;
         });
 
-        AOS.refresh();
+        projectsGrid.innerHTML = projectsHTML;
+        console.log('Projeler HTML\'e eklendi');
+        
+        if (typeof AOS !== 'undefined') {
+            AOS.refresh();
+            console.log('AOS yenilendi');
+        }
         
     } catch (error) {
         console.error('GitHub projeleri yüklenirken hata oluştu:', error);
@@ -175,11 +218,14 @@ async function fetchGitHubProjects() {
 
 function animateSkillBars() {
     const skillItems = document.querySelectorAll('.skill-item');
+    if (!skillItems || skillItems.length === 0) return;
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const skillProgress = entry.target.querySelector('.skill-progress');
+                if (!skillProgress) return;
+
                 const width = skillProgress.style.width;
                 skillProgress.style.width = '0';
                 setTimeout(() => {
@@ -193,113 +239,8 @@ function animateSkillBars() {
     });
 
     skillItems.forEach(item => {
-        observer.observe(item);
+        if (item) observer.observe(item);
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Sayfa yüklendi, projeler getiriliyor...');
-    fetchGitHubProjects();
-    animateSkillBars();
-    
-    const cursor = document.querySelector('.cursor');
-    const cursorFollower = document.querySelector('.cursor-follower');
-
-    if(cursor && cursorFollower) { 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-            
-            setTimeout(() => {
-                cursorFollower.style.left = e.clientX + 'px';
-                cursorFollower.style.top = e.clientY + 'px';
-            }, 100);
-        });
-
-        document.addEventListener('mousedown', () => {
-            cursor.style.transform = 'scale(0.5)';
-            cursorFollower.style.transform = 'scale(0.8)';
-        });
-
-        document.addEventListener('mouseup', () => {
-            cursor.style.transform = 'scale(1)';
-            cursorFollower.style.transform = 'scale(1)';
-        });
-
-        const links = document.querySelectorAll('a, button, .project-card, .skill-item');
-        links.forEach(link => {
-            link.addEventListener('mouseenter', () => {
-                cursor.style.transform = 'scale(2)';
-                cursorFollower.style.transform = 'scale(1.5)';
-            });
-            
-            link.addEventListener('mouseleave', () => {
-                cursor.style.transform = 'scale(1)';
-                cursorFollower.style.transform = 'scale(1)';
-            });
-        });
-    }
-
-    const menuBtn = document.querySelector('.menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-    const menuLines = document.querySelectorAll('.menu-line');
-
-    if(menuBtn && navLinks && menuLines.length > 0) { 
-         menuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuLines.forEach(line => line.classList.toggle('active'));
-        });
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if(target) {
-                 const headerOffset = 80;
-                const elementPosition = target.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    window.addEventListener('scroll', () => {
-        const navbar = document.querySelector('.navbar');
-        if(navbar) {
-            if (window.scrollY > 50) {
-                navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
-                navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-            } else {
-                navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.9)';
-                navbar.style.boxShadow = 'none';
-            }
-        }
-    });
-
-    const revealElements = document.querySelectorAll('.section-header, .about-content, .projects-grid, .skills-container, .contact-container');
-
-    const revealOnScroll = () => {
-        revealElements.forEach(element => {
-            const elementTop = element.getBoundingClientRect().top;
-            const elementVisible = 150;
-
-            if (elementTop < window.innerHeight - elementVisible) {
-                element.classList.add('revealed');
-            }
-        });
-    };
-
-    window.addEventListener('scroll', revealOnScroll);
-    revealOnScroll(); 
-
-    AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
-        once: true
-    });
-}); 
+document.addEventListener('DOMContentLoaded', initializePage); 
